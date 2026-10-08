@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - REDIS_URL=redis://redis:6379
+      - FRONTEND_URL=http://localhost
+    depends_on:
+      - redis
+    networks:
+      - mediflow_net
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ./backend
+    command: ["node", "src/worker.js"]
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=${MONGODB_URI}
+      - REDIS_URL=redis://redis:6379
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=${SMTP_FROM}
+    depends_on:
+      - redis
+    networks:
+      - mediflow_net
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    networks:
+      - mediflow_net
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    networks:
+      - mediflow_net
+    restart: unless-stopped
+    # Redis is intentionally NOT exposed to host via ports directive
+
+  mongodb:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    networks:
+      - mediflow_net
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+networks:
+  mediflow_net:
+    driver: bridge
+
+volumes:
+  mongo_data: {}

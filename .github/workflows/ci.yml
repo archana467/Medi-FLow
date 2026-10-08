@@ -1,0 +1,40 @@
+name: MediFlow CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18.x'
+
+    - name: Install Backend Dependencies
+      run: cd backend && npm ci
+
+    - name: Install Frontend Dependencies
+      run: cd frontend && npm ci
+
+    # Add testing steps here once tests are configured
+    # - name: Run Backend Tests
+    #   run: cd backend && npm test
+    # - name: Run Frontend Tests
+    #   run: cd frontend && npm test
+
+    - name: Build Frontend
+      run: cd frontend && npm run build
+
+    - name: Verify Backend Docker Build
+      run: docker build -t mediflow-backend ./backend
+
+    - name: Verify Frontend Docker Build
+      run: docker build -t mediflow-frontend -f ./frontend/Dockerfile .\n

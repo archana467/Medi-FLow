@@ -5,24 +5,24 @@ import { queueReminder } from '../queues/reminder.queue.js';
 
 export const createAppointment = async (appointmentData) => {
   const appointment = new Appointment(appointmentData);
-  // Queue Notification
-  await queueNotification('appointment-created', {
+  // Queue Notification (don't await to avoid hanging if Redis is down)
+  queueNotification('appointment-created', {
     type: 'APPOINTMENT_CREATED',
-    recipientUserId: (await appointment.populate('patientId')).patientId.userId,
-    clinicId,
+    recipientUserId: appointment.patientId, // simplifying since populate might not work well synchronously without await if we don't await the whole thing
+    clinicId: appointmentData.clinicId,
     title: 'Appointment Scheduled',
     message: `Your appointment on ${new Date(appointmentData.startTime).toLocaleString()} is scheduled.`,
     data: { appointmentId: appointment._id }
-  }).catch(err => console.error('Failed to queue notification:', err));
+  }).catch(err => console.error('Failed to queue notification:', err.message));
 
   // Schedule Reminder (e.g. 24 hours before)
   const reminderTime = new Date(appointmentData.startTime).getTime() - 24 * 60 * 60 * 1000;
   const delay = reminderTime - Date.now();
   if (delay > 0) {
-    await queueReminder('send-reminder', {
+    queueReminder('send-reminder', {
         appointmentId: appointment._id,
-        clinicId
-    }, { delay }).catch(err => console.error('Failed to queue reminder:', err));
+        clinicId: appointmentData.clinicId
+    }, { delay }).catch(err => console.error('Failed to queue reminder:', err.message));
   }
 
   return await appointment.save();
@@ -30,10 +30,15 @@ export const createAppointment = async (appointmentData) => {
 
 export const getAppointments = async (filter, skip = 0, limit = 10, sort = { appointmentDate: -1, startTime: -1 }) => {
   const appointments = await Appointment.find(filter)
-    .populate('patientId', 'firstName lastName phone')
-    .populate('doctorId', 'specialization')
+    .populate('clinicId', 'name city')
+    .populate({
+      path: 'patientId',
+      select: 'firstName lastName phone userId',
+      populate: { path: 'userId', select: 'name email' }
+    })
     .populate({
       path: 'doctorId',
+      select: 'specialization',
       populate: {
         path: 'userId',
         select: 'name email'

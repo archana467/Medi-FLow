@@ -11,7 +11,7 @@ const router = express.Router();
 router.use(requireAuth);
 router.use(requireTenant);
 
-router.use(authorizeRoles([ROLES.CLINIC_ADMIN, ROLES.RECEPTIONIST, ROLES.DOCTOR, ROLES.PATIENT]));
+router.use(authorizeRoles(ROLES.CLINIC_ADMIN, ROLES.RECEPTIONIST, ROLES.STAFF, ROLES.DOCTOR, ROLES.PATIENT));
 
 router.post('/', appointmentController.createAppointment);
 router.get('/', appointmentController.getAppointments);

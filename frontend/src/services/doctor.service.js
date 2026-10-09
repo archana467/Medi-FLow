@@ -3,7 +3,8 @@ import { authFetch, API_URL } from './api';
 export const doctorService = {
   getDoctors: async (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
-    const response = await authFetch(`${API_URL}/api/doctors?${queryString}`);
+    // Using the unified external search endpoint as requested
+    const response = await authFetch(`${API_URL}/api/external/doctors/search?${queryString}`);
     return response.json();
   },
   

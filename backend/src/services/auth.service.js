@@ -20,7 +20,7 @@ const getExpirationDate = (expiresIn) => {
 };
 
 export const registerUser = async (data) => {
-  const { name, email, password } = data;
+  const { name, email, password, role } = data;
   
   const existingUser = await User.findOne({ email: email.toLowerCase() });
   if (existingUser) {
@@ -32,13 +32,60 @@ export const registerUser = async (data) => {
   const salt = await bcrypt.genSalt(10);
   const passwordHash = await bcrypt.hash(password, salt);
 
+  // We should assign them to a default clinic if one exists
+  const Clinic = await import('../models/clinic.model.js').then(m => m.default);
+  const defaultClinic = await Clinic.findOne({});
+  const clinicId = defaultClinic ? defaultClinic._id : null;
+
   const user = new User({
     name,
     email: email.toLowerCase(),
-    passwordHash
+    passwordHash,
+    role: role || 'PATIENT',
+    clinicId
   });
 
   await user.save();
+
+  // Create corresponding role record
+  if (clinicId) {
+    if (user.role === 'PATIENT') {
+      const Patient = await import('../models/patient.model.js').then(m => m.default);
+      await Patient.create({
+        clinicId,
+        userId: user._id,
+        patientId: `PAT-${Date.now()}`,
+        firstName: name.split(' ')[0] || name,
+        lastName: name.split(' ').slice(1).join(' ') || 'Unknown',
+        dateOfBirth: new Date(),
+        gender: 'Other',
+        phone: '0000000000',
+        email: email.toLowerCase()
+      });
+    } else if (user.role === 'DOCTOR') {
+      const Doctor = await import('../models/doctor.model.js').then(m => m.default);
+      await Doctor.create({
+        clinicId,
+        userId: user._id,
+        doctorCode: `DOC-${Date.now()}`,
+        specialization: 'General',
+      });
+    }
+    } else if (user.role === 'STAFF') {
+      try {
+        const Staff = await import('../models/staff.model.js').then(m => m.default);
+        if (Staff) {
+          await Staff.create({
+            clinicId,
+            userId: user._id,
+            staffId: `STF-${Date.now()}`,
+            department: 'General'
+          });
+        }
+      } catch (e) {
+        // Staff model might not exist
+      }
+    }
 
   return await createAuthSession(user);
 };
@@ -122,7 +169,10 @@ export const getUserById = async (userId) => {
 };
 
 const createAuthSession = async (user) => {
-  const payload = { userId: user._id };
+  const payload = { 
+    userId: user._id,
+    role: user.role
+  };
   
   const accessToken = generateAccessToken(payload);
   const refreshToken = generateRefreshToken(payload);

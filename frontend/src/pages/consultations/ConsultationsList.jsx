@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getConsultations } from '../../services/consultation.service';
 import { MessageSquare, Calendar, Search, FileText, UserRound } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { Link } from 'react-router-dom';
 
 const ConsultationsList = () => {
   const { currentUser: user } = useAuth();
@@ -88,7 +89,7 @@ const ConsultationsList = () => {
                 <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
                   <Calendar className="w-4 h-4"/> {new Date(c.createdAt).toLocaleDateString()}
                 </div>
-                <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">View Details</button>
+                <Link to={`/consultations/${c._id}`} className="text-sm font-semibold text-blue-600 hover:text-blue-700">View Details</Link>
               </div>
             </div>
           ))}

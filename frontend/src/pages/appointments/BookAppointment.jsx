@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { ArrowLeft, Calendar as CalendarIcon, Clock, UserRound } from 'lucide-react';
 import api from '../../services/api';
+import { doctorService } from '../../services/doctor.service';
 
 const BookAppointment = () => {
   const { currentUser: user } = useAuth();
@@ -11,8 +12,11 @@ const BookAppointment = () => {
   const [doctors, setDoctors] = useState([]);
   const [loading, setLoading] = useState(true);
   
+  const [searchParams] = useSearchParams();
+  const initialDoctorId = searchParams.get('doctorId') || '';
+
   const [formData, setFormData] = useState({
-    doctorId: '',
+    doctorId: initialDoctorId,
     appointmentDate: '',
     startTime: '',
     reason: ''
@@ -24,9 +28,9 @@ const BookAppointment = () => {
   useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const res = await api.get('/doctors');
-        if (res.data?.success) {
-          setDoctors(res.data.data);
+        const res = await doctorService.getDoctors();
+        if (res.success) {
+          setDoctors(res.data);
         }
       } catch (err) {
         setError('Failed to load doctors.');
@@ -51,17 +55,18 @@ const BookAppointment = () => {
       const start = new Date(`${formData.appointmentDate}T${formData.startTime}`);
       const end = new Date(start.getTime() + 30 * 60000);
       
-      // We need patientId. Fetch from /patients/me if available, or fetch patient profile.
-      // Wait, appointment validator requires patientId. We can fetch it first if needed, 
-      // but let's try to pass dummy patientId and hope the backend doesn't crash if we updated the controller to override it.
-      // Actually, wait, the validator checks if patientId is a valid MongoId.
-      
+      const formatTime = (d) => {
+        const h = d.getHours().toString().padStart(2, '0');
+        const m = d.getMinutes().toString().padStart(2, '0');
+        return `${h}:${m}`;
+      };
+
       const payload = {
         doctorId: formData.doctorId,
-        patientId: user.userId, // use userId as a fallback valid mongo ID for validation
+        patientId: user.id,
         appointmentDate: formData.appointmentDate,
-        startTime: start.toISOString(),
-        endTime: end.toISOString(),
+        startTime: formatTime(start),
+        endTime: formatTime(end),
         reason: formData.reason,
         status: 'SCHEDULED'
       };
@@ -71,7 +76,11 @@ const BookAppointment = () => {
         navigate('/appointments');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to book appointment.');
+      if (err.response?.data?.errors) {
+        setError(Array.isArray(err.response.data.errors) ? err.response.data.errors.join(', ') : err.response.data.errors);
+      } else {
+        setError(err.response?.data?.message || 'Failed to book appointment.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -112,8 +121,8 @@ const BookAppointment = () => {
               >
                 <option value="">-- Choose a specialist --</option>
                 {doctors.map(doc => (
-                  <option key={doc._id} value={doc._id}>
-                    Dr. {doc.userId?.name || 'Unknown'} ({doc.specialization})
+                  <option key={doc.id || doc._id} value={doc.id || doc._id}>
+                    {doc.name?.startsWith('Dr.') ? doc.name : `Dr. ${doc.name || doc.userId?.name || 'Unknown'}`} - {doc.specialization} ({doc.hospital})
                   </option>
                 ))}
               </select>

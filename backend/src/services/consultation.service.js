@@ -7,7 +7,9 @@ export const createConsultation = async (consultationData) => {
 };
 
 export const getConsultationById = async (id, clinicId) => {
-  return await Consultation.findOne({ _id: id, clinicId })
+  const query = { _id: id };
+  if (clinicId) query.clinicId = clinicId;
+  return await Consultation.findOne(query)
     .populate('appointmentId')
     .populate('patientId', 'firstName lastName')
     .populate({ path: 'doctorId', populate: { path: 'userId', select: 'name' } });

@@ -6,7 +6,7 @@ import { connectSocket, disconnectSocket } from '../services/socket';
 import {
   LayoutDashboard, UserRound, Calendar, MessageSquare, FileText, 
   CreditCard, Settings, LogOut, Bell, Menu, X, Activity, Search,
-  ChevronLeft, ChevronRight, User, Pill, FileClock, Sun
+  ChevronLeft, ChevronRight, User, Pill, FileClock, Sun, Building2
 } from 'lucide-react';
 
 const AppLayout = () => {
@@ -43,6 +43,8 @@ const AppLayout = () => {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Appointments', path: '/appointments', icon: Calendar },
     { name: 'Find a Doctor', path: '/doctors', icon: UserRound },
+    { name: 'Global Doctors', path: '/external/doctors', icon: Search },
+    { name: 'Nearby Hospitals', path: '/external/hospitals', icon: Building2 },
     { name: 'Consultations', path: '/consultations', icon: MessageSquare },
     { name: 'Prescriptions', path: '/prescriptions', icon: Pill },
     { name: 'Medical Records', path: '/records', icon: FileClock },

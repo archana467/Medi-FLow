@@ -40,7 +40,11 @@ export const createConsultation = async (req, res, next) => {
 
 export const getConsultationById = async (req, res, next) => {
   try {
-    const consultation = await consultationService.getConsultationById(req.params.id, req.user.clinicId);
+    let clinicId = req.user.clinicId;
+    if (req.user.role === 'PATIENT' || req.user.role === 'SUPER_ADMIN') {
+        clinicId = undefined; // Don't restrict by clinic for these roles
+    }
+    const consultation = await consultationService.getConsultationById(req.params.id, clinicId);
     if (!consultation) return res.status(404).json({ success: false, message: 'Consultation not found' });
 
     // Patient restriction
@@ -56,16 +60,25 @@ export const getConsultationById = async (req, res, next) => {
 
 export const getConsultations = async (req, res, next) => {
   try {
-    const filter = getTenantFilter(req);
+    let filter = {};
+    if (req.user.role !== 'SUPER_ADMIN') {
+        if (req.user.role === 'PATIENT') {
+            const patient = await import('../models/patient.model.js').then(m => m.default).then(model => model.findOne({ userId: req.user.id || req.user.userId }));
+            if (patient) filter.patientId = patient._id;
+            else return res.json({ success: true, data: [], pagination: {} });
+        } else if (req.user.role === 'DOCTOR') {
+            const doctor = await import('../models/doctor.model.js').then(m => m.default).then(model => model.findOne({ userId: req.user.id || req.user.userId }));
+            if (doctor) filter.doctorId = doctor._id;
+            filter.clinicId = req.user.clinicId;
+        } else {
+            filter.clinicId = req.user.clinicId;
+        }
+    }
     
     if (req.query.patientId) filter.patientId = req.query.patientId;
     if (req.query.doctorId) filter.doctorId = req.query.doctorId;
     if (req.query.appointmentId) filter.appointmentId = req.query.appointmentId;
     if (req.query.status) filter.status = req.query.status;
-
-    // RBAC restrictions
-    if (req.user.role === 'PATIENT') filter.patientId = req.user.patientId;
-    if (req.user.role === 'DOCTOR') filter.doctorId = req.user.doctorId;
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;

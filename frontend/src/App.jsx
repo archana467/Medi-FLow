@@ -15,6 +15,7 @@ import PatientsList from './pages/patients/PatientsList';
 import DoctorsList from './pages/doctors/DoctorsList';
 import AppointmentsList from './pages/appointments/AppointmentsList';
 import ConsultationsList from './pages/consultations/ConsultationsList';
+import ConsultationDetails from './pages/consultations/ConsultationDetails';
 import PrescriptionsList from './pages/prescriptions/PrescriptionsList';
 import InvoicesList from './pages/billing/InvoicesList';
 import NotificationsList from './pages/notifications/NotificationsList';
@@ -22,6 +23,9 @@ import AuditLogsList from './pages/audit/AuditLogsList';
 import BookAppointment from './pages/appointments/BookAppointment';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
+import FindHospitals from './pages/external/FindHospitals';
+import FindDoctors from './pages/external/FindDoctors';
+import DoctorDetails from './pages/external/DoctorDetails';
 
 function App() {
   return (
@@ -79,6 +83,24 @@ function App() {
               </RoleRoute>
             } />
 
+            <Route path="external/hospitals" element={
+              <RoleRoute allowedRoles={['CLINIC_ADMIN', 'DOCTOR', 'RECEPTIONIST', 'PATIENT']}>
+                <FindHospitals />
+              </RoleRoute>
+            } />
+
+            <Route path="external/doctors" element={
+              <RoleRoute allowedRoles={['CLINIC_ADMIN', 'RECEPTIONIST', 'PATIENT']}>
+                <FindDoctors />
+              </RoleRoute>
+            } />
+            
+            <Route path="external/doctors/:id" element={
+              <RoleRoute allowedRoles={['CLINIC_ADMIN', 'RECEPTIONIST', 'PATIENT']}>
+                <DoctorDetails />
+              </RoleRoute>
+            } />
+
             <Route path="appointments" element={
               <RoleRoute allowedRoles={['CLINIC_ADMIN', 'DOCTOR', 'RECEPTIONIST', 'PATIENT']}>
                 <AppointmentsList />
@@ -88,6 +110,12 @@ function App() {
             <Route path="consultations" element={
               <RoleRoute allowedRoles={['CLINIC_ADMIN', 'DOCTOR', 'RECEPTIONIST', 'PATIENT']}>
                 <ConsultationsList />
+              </RoleRoute>
+            } />
+            
+            <Route path="consultations/:id" element={
+              <RoleRoute allowedRoles={['CLINIC_ADMIN', 'DOCTOR', 'RECEPTIONIST', 'PATIENT']}>
+                <ConsultationDetails />
               </RoleRoute>
             } />
 

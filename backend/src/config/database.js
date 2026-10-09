@@ -15,6 +15,15 @@ export const connectDB = async () => {
       serverSelectionTimeoutMS: 5000
     });
     console.log('MongoDB connected successfully');
+    
+    // Seed demo doctors if not present
+    try {
+      const { seedDoctors } = await import('../utils/seedDoctors.js');
+      await seedDoctors();
+    } catch (e) {
+      console.error('Failed to run seedDoctors:', e);
+    }
+    
     return true;
   } catch (error) {
     console.error('MongoDB connection failed:', error.message);

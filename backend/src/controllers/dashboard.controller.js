@@ -19,7 +19,7 @@ export const getDashboardOverview = async (req, res, next) => {
     if (role === 'SUPER_ADMIN') {
         // Platform level logic could go here
         summary = { message: "Platform stats" };
-    } else if (role === 'CLINIC_ADMIN' || role === 'RECEPTIONIST') {
+    } else if (role === 'CLINIC_ADMIN' || role === 'RECEPTIONIST' || role === 'STAFF') {
         const [patients, doctors, todayAppointments, upcomingAppointments, pendingInvoices] = await Promise.all([
             Patient.countDocuments({ clinicId, status: 'ACTIVE' }),
             Doctor.countDocuments({ clinicId, status: 'ACTIVE' }),

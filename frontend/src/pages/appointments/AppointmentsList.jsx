@@ -17,8 +17,8 @@ const AppointmentsList = () => {
     try {
       setLoading(true);
       const res = await appointmentService.getAppointments({ limit: 100 });
-      if (res.data?.success) {
-        setAppointments(res.data.data);
+      if (res?.success) {
+        setAppointments(res.data);
       }
     } catch (err) {
       console.error(err);
@@ -185,23 +185,23 @@ const AppointmentsList = () => {
                 <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
                   <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
                     <Calendar className="w-4 h-4 text-slate-400" />
-                    {new Date(app.startTime).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric' })}
+                    {new Date(app.appointmentDate).toLocaleDateString('en-US', { weekday: 'short', month: 'long', day: 'numeric' })}
                   </div>
                   <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
                     <Clock className="w-4 h-4 text-slate-400" />
-                    {new Date(app.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(app.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {new Date(`2000-01-01T${app.startTime}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(`2000-01-01T${app.endTime}`).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </div>
                   <div className="flex items-center gap-3 text-sm font-medium text-slate-700">
                     <MapPin className="w-4 h-4 text-slate-400" />
-                    MediFlow Clinic, Main Wing
+                    {app.clinicId?.name || 'MediFlow Clinic, Main Wing'}
                   </div>
                 </div>
               </div>
               
               <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex items-center gap-3">
-                <button className="flex-1 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
-                  View Details
-                </button>
+                <Link to="/consultations" className="flex-1 inline-flex justify-center items-center py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
+                  View Consultations
+                </Link>
                 {activeTab === 'upcoming' && (
                   <button className="flex-1 py-2.5 text-sm font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-colors">
                     Reschedule

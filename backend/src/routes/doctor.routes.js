@@ -11,9 +11,9 @@ const router = express.Router();
 router.use(requireAuth);
 router.use(requireTenant);
 
-router.get('/', authorizeRoles([ROLES.CLINIC_ADMIN, ROLES.RECEPTIONIST, ROLES.DOCTOR, ROLES.PATIENT]), doctorController.getDoctors);
-router.get('/:id', authorizeRoles([ROLES.CLINIC_ADMIN, ROLES.RECEPTIONIST, ROLES.DOCTOR, ROLES.PATIENT]), doctorController.getDoctorById);
-router.get('/:doctorId/availability', authorizeRoles([ROLES.CLINIC_ADMIN, ROLES.RECEPTIONIST, ROLES.DOCTOR, ROLES.PATIENT]), doctorController.getAvailability);
+router.get('/', authorizeRoles([ROLES.CLINIC_ADMIN, ROLES.RECEPTIONIST, ROLES.STAFF, ROLES.DOCTOR, ROLES.PATIENT]), doctorController.getDoctors);
+router.get('/:id', authorizeRoles([ROLES.CLINIC_ADMIN, ROLES.RECEPTIONIST, ROLES.STAFF, ROLES.DOCTOR, ROLES.PATIENT]), doctorController.getDoctorById);
+router.get('/:doctorId/availability', authorizeRoles([ROLES.CLINIC_ADMIN, ROLES.RECEPTIONIST, ROLES.STAFF, ROLES.DOCTOR, ROLES.PATIENT]), doctorController.getAvailability);
 
 // Only CLINIC_ADMIN can manage doctors and their availability
 router.use(authorizeRoles([ROLES.CLINIC_ADMIN]));

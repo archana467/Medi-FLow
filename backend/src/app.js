@@ -20,6 +20,7 @@ import metricsRoutes from './routes/metrics.routes.js';
 import { requestCorrelation } from './middleware/requestLogger.middleware.js';
 import { metricsMiddleware } from './middleware/metrics.middleware.js';
 import { errorHandler } from './middleware/error.middleware.js';
+import externalRoutes from './routes/external.routes.js';
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/audit-logs', auditRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/metrics', metricsRoutes);
+app.use('/api/external', externalRoutes);
 
 // Centralized error handling middleware
 app.use(errorHandler);

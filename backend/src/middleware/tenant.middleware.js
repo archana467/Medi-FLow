@@ -14,10 +14,16 @@ export const requireTenant = (req, res, next) => {
     req.tenant = {
       clinicId: req.query.clinicId || req.body.clinicId || null
     };
+  } else if (req.user.role === ROLES.PATIENT) {
+    // Patients don't strictly belong to one clinic, they interact with multiple clinics
+    req.tenant = {
+      clinicId: req.query.clinicId || req.body.clinicId || null
+    };
   } else {
-    // Clinic level users MUST have a clinicId
+    // Clinic level users (Doctors, Receptionists, Admins) MUST have a clinicId
     if (!req.user.clinicId) {
-      return res.status(403).json({ success: false, message: 'Forbidden: User does not belong to a clinic' });
+      console.log('User without clinicId blocked:', req.user);
+      return res.status(403).json({ success: false, message: `Forbidden: User does not belong to a clinic (Role: ${req.user.role})` });
     }
     req.tenant = {
       clinicId: req.user.clinicId

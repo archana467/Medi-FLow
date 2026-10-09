@@ -150,11 +150,11 @@ const Dashboard = () => {
                   <div className="bg-slate-50 rounded-xl p-4 flex gap-6 mt-2">
                     <div>
                       <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Date</p>
-                      <p className="font-bold text-slate-900">{new Date(upcomingAppt.startTime).toLocaleDateString()}</p>
+                      <p className="font-bold text-slate-900">{new Date(upcomingAppt.appointmentDate).toLocaleDateString()}</p>
                     </div>
                     <div>
                       <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Time</p>
-                      <p className="font-bold text-slate-900">{new Date(upcomingAppt.startTime).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</p>
+                      <p className="font-bold text-slate-900">{new Date(`2000-01-01T${upcomingAppt.startTime}`).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</p>
                     </div>
                   </div>
                   <div className="flex gap-3 mt-4">

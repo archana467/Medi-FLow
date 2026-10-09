@@ -56,7 +56,8 @@ export const AuthProvider = ({ children }) => {
       }
       return { success: false, message: data.message || data.errors?.[0] || 'Registration failed' };
     } catch (err) {
-      return { success: false, message: 'Server error or invalid response.' };
+      console.error("Registration error:", err);
+      return { success: false, message: `Server error or invalid response: ${err.message}` };
     }
   };
 

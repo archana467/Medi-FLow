@@ -12,7 +12,7 @@ router.use(requireAuth);
 router.use(requireTenant);
 
 // Only CLINIC_ADMIN, DOCTOR, RECEPTIONIST can manage patients
-router.use(authorizeRoles([ROLES.CLINIC_ADMIN, ROLES.DOCTOR, ROLES.RECEPTIONIST]));
+router.use(authorizeRoles([ROLES.CLINIC_ADMIN, ROLES.DOCTOR, ROLES.RECEPTIONIST, ROLES.STAFF]));
 
 router.post('/', patientController.createPatient);
 router.get('/', patientController.getPatients);

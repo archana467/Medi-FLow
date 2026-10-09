@@ -1,4 +1,5 @@
-export const authorizeRoles = (...allowedRoles) => {
+export const authorizeRoles = (...roles) => {
+  const allowedRoles = roles.flat();
   return (req, res, next) => {
     if (!req.user || !req.user.role) {
       return res.status(401).json({ success: false, message: 'Authentication required for authorization' });

@@ -9,7 +9,8 @@ import {
   Award,
   Phone,
   Mail,
-  FileText
+  FileText,
+  Building2
 } from 'lucide-react';
 
 import { useAuth } from '../../context/AuthContext';
@@ -26,7 +27,7 @@ const DoctorsList = () => {
 
   const fetchDoctors = async () => {
     try {
-      const res = await doctorService.getDoctors();
+      const res = await doctorService.getDoctors(); // wait, better to use the api directly
       if (res.success) setDoctors(res.data);
     } catch (error) {
       console.error(error);
@@ -36,9 +37,10 @@ const DoctorsList = () => {
   };
 
   const filteredDoctors = doctors.filter(d => 
-    d.userId?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.specialization?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.doctorCode?.toLowerCase().includes(searchQuery.toLowerCase())
+    (d.name || d.userId?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (d.specialization || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (d.registrationNumber || d.doctorCode || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (d.hospital || d.clinicId?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -111,11 +113,11 @@ const DoctorsList = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-sm shrink-0">
-                            {d.userId?.name?.charAt(0) || 'D'}
+                            {(d.name || d.userId?.name || 'D').charAt(0)}
                           </div>
                           <div>
-                            <p className="font-medium text-slate-900">Dr. {d.userId?.name || 'Unknown'}</p>
-                            <p className="text-xs text-slate-500 font-mono mt-0.5">Code: {d.doctorCode || d._id?.slice(-6)}</p>
+                            <p className="font-medium text-slate-900">{d.name?.startsWith('Dr.') ? d.name : `Dr. ${d.name || d.userId?.name || 'Unknown'}`}</p>
+                            <p className="text-xs text-slate-500 font-mono mt-0.5">Code: {d.registrationNumber || d.doctorCode || d.id?.slice(-6) || d._id?.slice(-6)}</p>
                           </div>
                         </div>
                       </td>
@@ -127,16 +129,18 @@ const DoctorsList = () => {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col space-y-1">
-                          {d.phone && (
+                          {d.hospital && (
                             <div className="flex items-center text-sm text-slate-600">
-                              <Phone className="w-3.5 h-3.5 mr-2 text-slate-400" />
-                              {d.phone}
+                              <Building2 className="w-3.5 h-3.5 mr-2 text-slate-400" />
+                              {d.hospital}
                             </div>
                           )}
-                          <div className="flex items-center text-sm text-slate-600">
-                            <Mail className="w-3.5 h-3.5 mr-2 text-slate-400" />
-                            {d.userId?.email || 'N/A'}
-                          </div>
+                          {(d.phone || d.userId?.email) && (
+                            <div className="flex items-center text-sm text-slate-600">
+                              <Mail className="w-3.5 h-3.5 mr-2 text-slate-400" />
+                              {d.phone || d.userId?.email || 'N/A'}
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
